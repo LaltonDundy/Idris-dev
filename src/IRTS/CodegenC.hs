@@ -889,18 +889,21 @@ wrapperName tag = "_idris_wrapper_" ++ show tag
 getCallback :: [BC] -> [(FDesc, Int)]
 getCallback bc = getCallback' (reverse bc)
     where
-        getCallback' (x:xs) = case hasCallback x of
-                                [] -> getCallback' xs
-                                cbs -> case findCons cbs xs of
-                                        [] -> error "Idris function couldn't be wrapped."
-                                        x -> x
+        getCallback' (x:xs) = 
+                case hasCallback x of
+                            [] -> getCallback' xs
+                            cbs -> case findCons cbs xs of
+                                    [] -> error "Idris function couldn't be wrapped."
+                                    x -> x
         getCallback' [] = []
         findCons (c:cs) xs = findCon c xs ++ findCons cs xs
         findCons [] _ = []
         findCon c ((MKCON l loc tag args):xs) | snd c == l =
             if null args
                 then [(fst c, tag)]
-                else error "Can't wrap a closure as callback."
+                else error $ (++)
+                            "Can't wrap a closure as callback."
+                            ( show args )
         findCon c (_:xs) = findCon c xs
         findCon c [] = []
 
